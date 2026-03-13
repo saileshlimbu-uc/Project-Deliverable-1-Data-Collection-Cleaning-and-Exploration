@@ -1,2 +1,136 @@
-# Project-Deliverable-1-Data-Collection-Cleaning-and-Exploration
-# Project-Deliverable-1-Data-Collection-Cleaning-and-Exploration
+
+# MSCS 634 – Advanced Data Mining
+## Project Deliverable 1: Data Collection, Cleaning, and Exploration
+
+---
+
+## 📊 Dataset Overview
+
+**Dataset:** Titanic Passenger Survival Dataset  
+**Source:** Kaggle / UCI Machine Learning Repository  
+**Records:** 891 passengers  
+**Attributes:** 12 original columns (14 after feature engineering)  
+
+The Titanic dataset contains demographic, socioeconomic, and travel-related information for passengers aboard the RMS Titanic (April 1912). The target variable is **Survived** (0 = did not survive, 1 = survived).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| PassengerId | Integer | Unique identifier |
+| Survived | Binary | Target: 0 = No, 1 = Yes |
+| Pclass | Ordinal | Ticket class (1st/2nd/3rd) |
+| Name | String | Passenger full name |
+| Sex | Categorical | Gender |
+| Age | Float | Age in years |
+| SibSp | Integer | # siblings/spouses aboard |
+| Parch | Integer | # parents/children aboard |
+| Ticket | String | Ticket number |
+| Fare | Float | Fare paid (£) |
+| Cabin | String | Cabin number |
+| Embarked | Categorical | Port: C=Cherbourg, Q=Queenstown, S=Southampton |
+
+---
+
+## 🔑 Key Insights from EDA
+
+| Finding | Detail |
+|---------|--------|
+| **Gender is the strongest predictor** | Females survived at 74.2%, males at only 18.9% |
+| **Passenger class matters** | 1st class: 63% survival; 3rd class: only 24% |
+| **Children prioritized** | Passengers under 12 had the highest survival rate |
+| **Higher fare = higher survival** | Positive correlation between Fare and Survived (r = 0.26) |
+| **Family size effect** | Small families (2–4 members) survived better than solo travelers or large groups |
+| **Class imbalance** | ~38% survived vs ~62% did not — mild imbalance to address in modeling |
+
+---
+
+## 🧹 Data Cleaning Steps
+
+### 1. Missing Values
+| Column | Missing % | Strategy | Rationale |
+|--------|-----------|----------|-----------|
+| Cabin | 77.1% | **Dropped** | Too sparse to impute meaningfully |
+| Age | 19.9% | **Median imputation** | Median is robust to age outliers |
+| Embarked | 0.2% (2 rows) | **Mode imputation** | Only 2 missing; mode = 'S' |
+
+### 2. Duplicates
+- **Found:** 0 duplicate rows — no action required.
+
+### 3. Outliers (IQR Method)
+- **Fare:** Right-skewed with extreme values (e.g., £512). Applied **Winsorization** (capped at IQR upper bound) to prevent distortion in regression models.
+- **Age:** Outliers retained — values up to ~80 years are domain-valid (elderly passengers).
+
+### 4. Data Type Corrections
+- `Survived` → `int`
+- `Pclass`, `Sex`, `Embarked` → `category`
+- `Sex` values standardized to lowercase
+
+### 5. Feature Engineering
+- `FamilySize` = SibSp + Parch + 1
+- `IsAlone` = 1 if FamilySize == 1, else 0
+- `AgeGroup` = binned Age into 5 categories
+
+---
+
+## 📁 Repository Contents
+
+```
+MSCS_634_ProjectDeliverable_1/
+├── MSCS_634_ProjectDeliverable_1.ipynb   ← Main Jupyter Notebook
+├── titanic.csv                            ← Original dataset
+├── titanic_cleaned.csv                    ← Cleaned dataset (output)
+├── README.md                              ← This file
+└── figures/                               ← EDA visualizations
+    ├── fig_missing_values.png
+    ├── fig_outliers.png
+    ├── fig_survival_dist.png
+    ├── fig_survival_categorical.png
+    ├── fig_age_fare_dist.png
+    ├── fig_family_survival.png
+    ├── fig_correlation_heatmap.png
+    ├── fig_pairplot.png
+    ├── fig_age_group_survival.png
+    └── fig_sex_pclass_heatmap.png
+```
+
+---
+
+## ⚠️ Challenges Encountered & Solutions
+
+| Challenge | Solution |
+|-----------|----------|
+| **Cabin column unusable** | Dropped — 77% missing with no reliable imputation strategy |
+| **Age skewness after imputation** | Used median (not mean) to avoid bias from elderly-passenger outliers |
+| **Fare extreme values** | Winsorized instead of removing — preserves record count while reducing skew |
+| **Class imbalance in target** | Noted for Deliverable 2; will apply class weighting or SMOTE in classifiers |
+| **Multicollinearity** | SibSp, Parch, and FamilySize are correlated — will monitor VIF in regression tasks |
+
+---
+
+## 🔮 Next Steps (Deliverable 2)
+
+- Extract `Title` from passenger `Name` field (Mr, Mrs, Miss, Master, etc.)
+- One-hot encode `Sex`, `Embarked`; ordinal-encode `Pclass`
+- Build baseline **regression model** to predict `Fare`
+- Apply **normalization** (StandardScaler / MinMaxScaler) before distance-based models
+
+---
+
+## 🛠️ Requirements
+
+```
+pandas>=1.5
+numpy>=1.23
+matplotlib>=3.6
+seaborn>=0.12
+scipy>=1.9
+jupyter
+```
+
+Install with:
+```bash
+pip install pandas numpy matplotlib seaborn scipy jupyter
+```
+
+---
+
+*MSCS 634 – Advanced Data Mining | Deliverable 1*
